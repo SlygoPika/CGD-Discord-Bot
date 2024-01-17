@@ -1,10 +1,7 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import has_permissions
-
-
-ADMIN = "Admin"
-RESERVED_CHANNEL = "team-forming"
+import cogs.utils.constants as constants
 
 
 class TeamForming(commands.Cog):
@@ -31,7 +28,7 @@ class TeamForming(commands.Cog):
             channel_id = all_text_channel_dict[targetChannel]
 
             target_channel = self.bot.get_channel(channel_id)
-            await target_channel.send("React here to join")
+            await target_channel.send(constants.CREATE_TEAM_MESSAGE)
 
 
 async def setup(bot):
