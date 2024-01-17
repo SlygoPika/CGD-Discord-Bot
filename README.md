@@ -1,1 +1,0 @@
-# CGD-Discord-Bot
