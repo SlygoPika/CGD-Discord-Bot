@@ -6,7 +6,6 @@ from discord.ext import commands
 
 load_dotenv()
 TOKEN: Final[str] = os.getenv('BOT_TOKEN')
-print(TOKEN)
 
 # This example requires the 'message_content' intent.
 
@@ -16,20 +15,16 @@ client: Client = Client(intents=intents)
 
 bot = commands.Bot(command_prefix='$', intents=intents)
 
-async def send_message(message: Message, user_message: str) -> None:
-    # response: str = get_response(message.content)
-    # await message.channel.send(response)
-    if not user_message:
-        print('No message. Intents were not enabled properly.')
+
+@client.event
+async def on_ready():
+    print("We have logged in as {0.user}".format(client))
+
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
         return
-    
-    await message.channel.send('Hello World')
 
-@bot.command()
-async def test(ctx, arg):
-    await ctx.send(arg)
-    pass
-
-bot.add_command(test)
 
 client.run(TOKEN)
