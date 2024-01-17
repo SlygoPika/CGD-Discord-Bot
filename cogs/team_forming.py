@@ -1,8 +1,10 @@
 import discord
 from discord.ext import commands
-import cogs.utils.user_utils as user
+from discord.ext.commands import has_permissions
+
 
 ADMIN = "Admin"
+RESERVED_CHANNEL = "team-forming"
 
 
 class TeamForming(commands.Cog):
@@ -17,16 +19,19 @@ class TeamForming(commands.Cog):
             await channel.send(f'Welcome {member.mention}.')
 
     @commands.command()
-    async def setTeamFormingChannel(self, ctx, *, member: discord.Member = None):
-        print("Helllo")
-        # member_roles = member.roles
-        # print(member.name)
-        # print(member_roles)
-        # print(ctx.author)
-        print(user.get_user_roles(ctx))
+    @has_permissions(administrator=True)
+    async def setTeamFormingChannel(self, ctx, targetChannel):
+        all_channels = ctx.guild.channels  # get all channels
+        all_text_channel_dict = {channel.name: channel.id for channel in all_channels if isinstance(
+            channel, discord.TextChannel)}
 
-        # if ADMIN not in member_roles:
-        #     return
+        if targetChannel not in all_text_channel_dict.keys():
+            await ctx.send(f'{targetChannel} does not exist. Select an existing channel please')
+        else:
+            channel_id = all_text_channel_dict[targetChannel]
+
+            target_channel = self.bot.get_channel(channel_id)
+            await target_channel.send("React here to join")
 
 
 async def setup(bot):
