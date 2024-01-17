@@ -1,25 +1,25 @@
-import discord
-import dotenv
+from typing import Final
+import os
+from dotenv import load_dotenv
+from discord import Intents, Client, Message
 
-
-TOKEN = dotenv.get_key(".env", "BOT_TOKEN")
+load_dotenv()
+TOKEN: Final[str] = os.getenv('BOT_TOKEN')
 print(TOKEN)
 
 # This example requires the 'message_content' intent.
 
-
-class MyClient(discord.Client):
-    async def on_ready(self):
-        print(f'Logged on as {self.user}!')
-
-    async def on_message(self, message):
-        print(f'Message from {message.author}: {message.content}')
-
-
-intents = discord.Intents.default()
+intents: Intents = Intents.default()
 intents.message_content = True
+client: Client = Client(intents=intents)
 
-client = MyClient(intents=intents)
+async def send_message(message: Message, user_message: str) -> None:
+    # response: str = get_response(message.content)
+    # await message.channel.send(response)
+    if not user_message:
+        print('No message. Intents were not enabled properly.')
+        return
+    
+    await message.channel.send('Hello World')
 
-# keep_alive()
 client.run(TOKEN)
