@@ -25,5 +25,3 @@ async def main():
         await bot.bot.start(bot.TOKEN)
 
 asyncio.run(main())
-
-#bot.run()
