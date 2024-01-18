@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 import cogs.utils.constants as constants
+import cogs.utils.channel_utils as channels
 
 
 class TeamForming(commands.Cog):
@@ -42,6 +43,7 @@ class TeamForming(commands.Cog):
         guild_id = payload.guild_id
         member = payload.member
         message_id = payload.message_id
+        channel_id = payload.channel_id
 
         if message_id != self.create_message_id:
             return
@@ -54,15 +56,13 @@ class TeamForming(commands.Cog):
 
         # Get the existing teams and count the number of teams
         existing_teams = [role.name for role in guild.roles]
-        team_count = 0
-        title = f"Team-{str(team_count).zfill(4)}"
 
-        while title in existing_teams:
-            temp_title = f"Team-{str(team_count).zfill(4)}"
-            if temp_title not in existing_teams:
-                title = temp_title
-                break
-            team_count += 1
+        title = channels.auto_team_channel_naming(existing_teams)
+
+        if title == None:
+            channel = await self.bot.fetch_channel(channel_id)
+            await channel.send("Something went wrong. Please contact admin")
+            return
 
         new_role = await guild.create_role(name=title)
 
