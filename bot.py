@@ -21,8 +21,9 @@ class Bot:
         self.TOKEN: Final[str] = os.getenv('BOT_TOKEN')
         self.intents: Intents = Intents.default()
         self.intents.message_content = True
+        self.intents.reactions = True
         self.client: Client = Client(intents=self.intents)
         self.bot = commands.Bot(command_prefix='$', intents=self.intents)
-    
-bot = Bot()
 
+
+bot = Bot()
