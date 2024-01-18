@@ -3,8 +3,10 @@ from discord.ext import commands
 from discord.ext.commands import has_permissions
 
 
-ADMIN = "Admin"
-RESERVED_CHANNEL = "team-forming"
+# message id for react to create team
+CREATE_TEAM_MESSAGE_ID = 1197319589151907896
+# channel id of the join_message
+CHANNEL_ID_FOR_TEAM_CREATION = 1197243258577879171
 
 
 class TeamForming(commands.Cog):
@@ -32,6 +34,16 @@ class TeamForming(commands.Cog):
 
             target_channel = self.bot.get_channel(channel_id)
             await target_channel.send("React here to join")
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        print("hello")
+
+        guild_id = payload.guild_id
+        print(guild_id)
+        guild = await self.bot.fetch_guild(guild_id)
+        channel = await guild.create_text_channel("Team 10")
+        await channel.send("You have joined Team 10")
 
 
 async def setup(bot):
