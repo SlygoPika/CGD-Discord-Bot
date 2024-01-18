@@ -11,15 +11,12 @@ class TeamForming(commands.Cog):
         self.create_message_id = None
         self.message_url = None
 
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        channel = member.guild.system_channel
-        if channel is not None:
-            await channel.send(f'Welcome {member.mention}.')
-
     @commands.command()
     @has_permissions(administrator=True)
     async def setTeamFormingChannel(self, ctx, targetChannel):
+        '''
+        Creates message where people can react to to join a team
+        '''
         if self.create_message_id != None:
             await ctx.send(f'Create team message already exists here {self.message_url}')
             return
@@ -40,6 +37,10 @@ class TeamForming(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        '''
+        Creates new team channel on react of specific message
+        '''
+
         guild_id = payload.guild_id
         member = payload.member
         message_id = payload.message_id
@@ -49,6 +50,7 @@ class TeamForming(commands.Cog):
             return
 
         guild = await self.bot.fetch_guild(guild_id)
+        # so that new text channels goes into the specific category for teams
         teamCategory = self.bot.get_cog('TeamCategory').teamCategory
 
         if teamCategory is None:
@@ -68,6 +70,7 @@ class TeamForming(commands.Cog):
 
         await member.add_roles(new_role, atomic=True)
 
+        # permissions for team
         overwrites = {
             new_role: discord.PermissionOverwrite(read_messages=True),
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
