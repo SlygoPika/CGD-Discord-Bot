@@ -67,6 +67,15 @@ class TeamName(commands.Cog):
         await currentChannel.edit(name=channelName)
         
         await ctx.send(f'Your team name has successfully been set to "{newTeamName}"')
+    
+    #function called when SetTeamName is on cooldown
+    @SetTeamName.error
+    async def SetTeamName_error(self, ctx, error):
+        print ("on_command_error has run")
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"SetTeamName is on cooldown. Try again in {error.retry_after:.2f}s.", delete_after=5)
+        else:
+            print(error)
 
 async def setup(bot):
     await bot.add_cog(TeamName(bot))
