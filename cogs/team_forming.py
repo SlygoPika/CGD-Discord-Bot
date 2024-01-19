@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.ext.commands import has_permissions
 import cogs.utils.constants as constants
 import cogs.utils.channel_utils as channels
+from cogs.UI.team_dropdown import TeamDropdownView
 
 
 class TeamForming(commands.Cog):
@@ -31,15 +32,28 @@ class TeamForming(commands.Cog):
         else:
             channel_id = all_text_channel_dict[targetChannel]
             target_channel = self.bot.get_channel(channel_id)
-            message = await target_channel.send("Official: React here to join")
-            self.create_message_id = message.id
-            self.message_url = message.jump_url
+            create_message = await target_channel.send(constants.CREATE_TEAM_MESSAGE)
+            self.create_message_id = create_message.id
+            self.message_url = create_message.jump_url
+            
+            #add emoji reaction to message
+            await create_message.add_reaction(self.bot.get_cog('TeamEmoji').team_create_emoji)
+            
+            join_message = await target_channel.send(constants.JOIN_TEAM_MESSAGE, view=TeamDropdownView())
+            self.join_message_id = join_message.id
+            #self.message_url = join_message.jump_url
+            
+            await ctx.send(f'{self.message_url} has been set up as the team forming channel.')
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         '''
         Creates new team channel on react of specific message
         '''
+        
+        #check if the reaction is not from the bot
+        if payload.member.bot:
+            return
 
         guild_id = payload.guild_id
         member = payload.member
