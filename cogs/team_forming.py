@@ -61,10 +61,16 @@ class TeamForming(commands.Cog):
 
         title = channels.auto_team_channel_naming(existing_teams)
 
-        if title == None:
-            channel = await self.bot.fetch_channel(channel_id)
-            await channel.send("Something went wrong. Please contact admin")
-            return
+        team_count = 0
+        title = f"{constants.NEW_TEAM_NAME_PREFIX}{str(team_count).zfill(4)}"
+
+        while title in existing_teams:
+            temp_title = f"{constants.NEW_TEAM_NAME_PREFIX}{
+                str(team_count).zfill(4)}"
+            if temp_title not in existing_teams:
+                title = temp_title
+                break
+            team_count += 1
 
         new_role = await guild.create_role(name=title)
 
