@@ -13,7 +13,7 @@ class TeamForming(commands.Cog):
 
     @commands.command()
     @has_permissions(administrator=True)
-    async def setTeamFormingChannel(self, ctx, targetChannel):
+    async def SetTeamFormingChannel(self, ctx, targetChannel):
         '''
         Creates message where people can react to to join a team
         '''
@@ -65,8 +65,7 @@ class TeamForming(commands.Cog):
         title = f"{constants.NEW_TEAM_NAME_PREFIX}{str(team_count).zfill(4)}"
 
         while title in existing_teams:
-            temp_title = f"{constants.NEW_TEAM_NAME_PREFIX}{
-                str(team_count).zfill(4)}"
+            temp_title = f"{constants.NEW_TEAM_NAME_PREFIX}{str(team_count).zfill(4)}"
             if temp_title not in existing_teams:
                 title = temp_title
                 break
