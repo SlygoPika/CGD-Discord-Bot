@@ -7,10 +7,28 @@ from cogs.UI.team_dropdown import TeamDropdownView
 
 
 class TeamForming(commands.Cog):
+    
+    class Team:
+        def __init__(self, team_name, team_leader, team_members, team_channel, team_role):
+            self.team_name = team_name
+            self.team_leader = team_leader
+            self.team_members = team_members
+            self.team_channel = team_channel
+            self.team_role = team_role
+        
+        def add_member(self, member):
+            self.team_members.append(member)
+        
+        def remove_member(self, member):
+            self.team_members.remove(member)
+    
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.create_message_id = None
         self.message_url = None
+        
+        self.teams = []
+    
 
     @commands.command()
     @has_permissions(administrator=True)
@@ -32,6 +50,7 @@ class TeamForming(commands.Cog):
         else:
             channel_id = all_text_channel_dict[targetChannel]
             target_channel = self.bot.get_channel(channel_id)
+            self.team_forming_channel = target_channel
             create_message = await target_channel.send(constants.CREATE_TEAM_MESSAGE)
             self.create_message_id = create_message.id
             self.message_url = create_message.jump_url
@@ -39,8 +58,8 @@ class TeamForming(commands.Cog):
             #add emoji reaction to message
             await create_message.add_reaction(self.bot.get_cog('TeamEmoji').team_create_emoji)
             
-            join_message = await target_channel.send(constants.JOIN_TEAM_MESSAGE, view=TeamDropdownView())
-            self.join_message_id = join_message.id
+            self.join_message = await target_channel.send(constants.JOIN_TEAM_MESSAGE, view=TeamDropdownView(on_team_select=self.on_team_join))
+            self.join_message_id = self.join_message.id
             #self.message_url = join_message.jump_url
             
             await ctx.send(f'{self.message_url} has been set up as the team forming channel.')
@@ -99,6 +118,24 @@ class TeamForming(commands.Cog):
         channel = await guild.create_text_channel(title, category=teamCategory, overwrites=overwrites)
 
         await channel.send(f"You have joined {title}")
+        
+        new_team = self.Team(title, member, [member], channel, new_role)
+        self.teams.append(new_team)
+        
+        await self.join_message.edit(view=TeamDropdownView(on_team_select=self.on_team_join, new_team_name=title))
+        print("team added")
+        
+    async def on_team_join(self, interaction, team_name):
+        print("on_team_join has run")
+        #await self.team_forming_channel.send(f'You joined team {team_name}!')
+        
+        for team in self.teams:
+            if team.team_name == team_name:
+                team.add_member(interaction.user)
+                await team.team_channel.send(f'{interaction.user} joined team {team_name}!')
+                # add team role to user
+                await interaction.user.add_roles(team.team_role, atomic=True)
+                return
 
 
 async def setup(bot):
