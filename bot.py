@@ -4,17 +4,6 @@ from dotenv import load_dotenv
 from discord import Intents, Client, Message
 from discord.ext import commands
 
-# # COG IMPORTS
-# from src.commands import ChannelInit
-from cogs.greetings import Greetings
-
-
-# Bot class
-# Members:
-#   TOKEN: Final[str]
-#   intents: Intents
-#   client: Client
-#   bot: commands.Bot
 class Bot:
     def __init__(self):
         load_dotenv()
