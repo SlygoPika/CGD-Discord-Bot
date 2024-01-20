@@ -1,15 +1,16 @@
 import discord
 from discord.ext import commands
 import cogs.utils.user_utils as user
+import cogs.utils.constants as constants
 
 
 class TeamName(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # Returns true if the team name is shorter than 16 characters, starts with a letter, and only contains letters and numbers
+    # Returns true if the team name is shorter than 24 characters, starts with a letter, and only contains letters and numbers
     def teamNameIsValid(self, teamName) -> bool:
-        return len(teamName) <= 16 and teamName[0].isalpha() and teamName.replace(' ', '').isalnum()
+        return len(teamName) <= constants.TEAM_NAME_MAX_LENGTH and teamName[0].isalpha() and teamName.replace(' ', '').isalnum()
 
     def teamNameExists(self, teamName):
         teamCategory = self.bot.get_cog('TeamCategory').teamCategory
@@ -34,17 +35,17 @@ class TeamName(commands.Cog):
     async def SetTeamName(self, ctx, newTeamName):
         print("SetTeamName has run with " + newTeamName)
         newTeamName = str(newTeamName.strip())
-        roles = user.get_user_roles(ctx)
         currentChannel = ctx.channel
         hasPermissions = False
         teamRole = None
+        
+        teamForming = self.bot.get_cog('TeamForming')
 
         # Checking if the user has a role that matches the current channel
-        for role in roles:
-            if self.roleNameToChannelName(role.name) == currentChannel.name:
-                # await ctx.send('You have the permissions to change the channel!')
+        for team in teamForming.teams:
+            if team.team_channel.name == currentChannel.name:
+                teamRole = team.team_role
                 hasPermissions = True
-                teamRole = role
                 break
 
         if not hasPermissions or not self.channelIsInTeamCategory(ctx):
@@ -52,7 +53,7 @@ class TeamName(commands.Cog):
             return
         print("pass")
         if not self.teamNameIsValid(newTeamName):
-            await ctx.send("Your team name must be 16 characters or less, start with a letter, and only contain letters and numbers")
+            await ctx.send(f"Your team name must be {constants.TEAM_NAME_MAX_LENGTH} characters or less, start with a letter, and only contain letters and numbers")
             return
         print("pass")
 
@@ -60,6 +61,13 @@ class TeamName(commands.Cog):
             await ctx.send("That team name is already taken. Please choose another name.")
             return
         print("pass")
+        
+        # Update the team list in TeamForming
+        for team in teamForming.teams:
+            if team.team_name == teamRole.name:
+                team.team_name = newTeamName
+                await teamForming.update_team_dropdown()
+                break
 
         await teamRole.edit(name=newTeamName)
         channelName = self.roleNameToChannelName(newTeamName)

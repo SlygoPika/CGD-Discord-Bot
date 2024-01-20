@@ -6,8 +6,6 @@ from discord.ext import commands
 from bot import Bot, bot
 import asyncio
 
-from cogs.greetings import Greetings
-
 
 @bot.client.event
 async def on_message(message):
