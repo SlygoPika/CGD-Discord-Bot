@@ -166,6 +166,11 @@ class TeamForming(commands.Cog):
         for team in self.teams:
             if team.team_name == team_name:
                 
+                # Check if the member is already in the team
+                if interaction.user in team.team_members:
+                    await interaction.response.send_message("You are already in this team.", ephemeral=True)
+                    return
+                
                 # Check if the person is already in a team
                 for teamPrev in self.teams:
                     if interaction.user in teamPrev.team_members:
@@ -173,6 +178,11 @@ class TeamForming(commands.Cog):
                         await self.on_team_leave(interaction=interaction, team_name=teamPrev.team_name)
                 
                 team.add_member(interaction.user)
+                
+                if team.team_leader == None:
+                    team.team_leader = interaction.user
+                    await interaction.user.add_roles(self.team_leader_role, atomic=True)
+                
                 await team.team_channel.send(f'{interaction.user} joined team {team_name}!')
                 # add team role to user
                 await interaction.user.add_roles(team.team_role, atomic=True)
@@ -183,6 +193,10 @@ class TeamForming(commands.Cog):
         
         for team in self.teams:
             if team.team_name == team_name:
+                if interaction.user not in team.team_members:
+                    await interaction.response.send_message("You are not in this team.", ephemeral=True)
+                    return
+                                
                 team.remove_member(interaction.user)
                 await team.team_channel.send(f'{interaction.user} left team {team_name}!')
                 # remove team role from user
