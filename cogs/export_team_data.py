@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 import pandas as pd
+import os
 
 class ExportTeamData(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -61,6 +62,9 @@ class ExportTeamData(commands.Cog):
         
         # Send the file to the user
         await ctx.send("Here's the team data!", file=discord.File("teams.xlsx"))
+        
+        # Delete the file
+        os.remove("teams.xlsx")
         
 
 async def setup(bot):

@@ -13,9 +13,9 @@ class TeamName(commands.Cog):
         return len(teamName) <= constants.TEAM_NAME_MAX_LENGTH and teamName[0].isalpha() and teamName.replace(' ', '').isalnum()
 
     def teamNameExists(self, teamName):
-        teamCategory = self.bot.get_cog('TeamCategory').teamCategory
-        for channel in teamCategory.channels:
-            if channel.name == self.roleNameToChannelName(teamName):
+        teams = self.bot.get_cog('TeamForming').teams
+        for team in teams:
+            if team.channel.name == self.roleNameToChannelName(teamName):
                 return True
         return False
 
@@ -35,32 +35,38 @@ class TeamName(commands.Cog):
     async def SetTeamName(self, ctx, newTeamName):
         print("SetTeamName has run with " + newTeamName)
         newTeamName = str(newTeamName.strip())
-        currentChannel = ctx.channel
-        hasPermissions = False
         teamRole = None
         
         teamForming = self.bot.get_cog('TeamForming')
-
-        # Checking if the user has a role that matches the current channel
-        for team in teamForming.teams:
-            if team.team_channel.name == currentChannel.name:
+        
+        exists = False
+        teamToChange = None
+        
+        # Check if user is in a team
+        for team in self.teams:
+            if team.team_leader == ctx.author:
+                exists = True
+                teamToChange = team
                 teamRole = team.team_role
-                hasPermissions = True
                 break
-
-        if not hasPermissions or not self.channelIsInTeamCategory(ctx):
-            await ctx.send("You are not in your team's channel")
+        
+        if ctx.channel != teamToChange.team_channel or exists == False:
+            self.SetTeamName.reset_cooldown(ctx)
             return
-        print("pass")
+        
+        if teamForming.isFrozen:
+            await ctx.send(constants.FROZEN_TEAM_TEXT, delete_after=8)
+            return
+
         if not self.teamNameIsValid(newTeamName):
             await ctx.send(f"Your team name must be {constants.TEAM_NAME_MAX_LENGTH} characters or less, start with a letter, and only contain letters and numbers")
+            self.SetTeamName.reset_cooldown(ctx)
             return
-        print("pass")
 
         if self.teamNameExists(newTeamName):
             await ctx.send("That team name is already taken. Please choose another name.")
+            self.SetTeamName.reset_cooldown(ctx)
             return
-        print("pass")
         
         # Update the team list in TeamForming
         for team in teamForming.teams:
@@ -71,8 +77,7 @@ class TeamName(commands.Cog):
 
         await teamRole.edit(name=newTeamName)
         channelName = self.roleNameToChannelName(newTeamName)
-        print(channelName)
-        await currentChannel.edit(name=channelName)
+        await ctx.channel.edit(name=channelName)
 
         await ctx.send(f'Your team name has successfully been set to "{newTeamName}"')
     

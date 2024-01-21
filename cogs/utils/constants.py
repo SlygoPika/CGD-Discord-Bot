@@ -5,3 +5,4 @@ DEFAULT_TEAM_CREATE_EMOJI = "✅"
 TEAM_LEADER_ROLE_NAME = "Team Leader"
 NO_TEAM_OPTION = "Teamless"
 TEAM_NAME_MAX_LENGTH = 24
+FROZEN_TEAM_TEXT = "The team formation process has ended. Please contact a staff member to edit your team status."

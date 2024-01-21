@@ -36,6 +36,7 @@ class TeamForming(commands.Cog):
         self.join_message = None
         self.switch_team_message = None
         self.teams = []
+        self.isFrozen = False
     
 
     @commands.command()
@@ -89,7 +90,11 @@ class TeamForming(commands.Cog):
         if interaction.user.bot:
             return
         
-        print("owo")
+        #check if Team Editing is frozen
+        if self.isFrozen:
+            await interaction.response.send_message(constants.FROZEN_TEAM_TEXT, ephemeral=True, delete_after=8)
+            return
+        
         team_to_leave = None
         #Check if the person reacting is in a team
         for team in self.teams:
@@ -106,15 +111,11 @@ class TeamForming(commands.Cog):
                         self.switch_team_message = None
                     team_to_leave = team.team_name
                     break
-
-        print ("ewe")
         
         guild_id = interaction.guild_id
         member = interaction.user
         message_id = interaction.message.id
 
-        print("uwu")
-        
         if message_id != self.create_message_id:
             return
 
@@ -167,6 +168,10 @@ class TeamForming(commands.Cog):
     async def on_team_join(self, interaction, team_name, approved=False):
         print("on_team_join has run")
         #await self.team_forming_channel.send(f'You joined team {team_name}!')
+        
+        if self.isFrozen:
+            await interaction.response.send_message(constants.FROZEN_TEAM_TEXT, ephemeral=True, delete_after=8)
+            return
         
         if team_name == constants.NO_TEAM_OPTION:
             for team in self.teams:
@@ -246,6 +251,64 @@ class TeamForming(commands.Cog):
         team_names = [team.team_name for team in self.teams]
         await self.join_message.edit(view=TeamDropdownView(on_team_select=self.on_team_join, teams=team_names))
         print("update_team_dropdown has finished")
+    
+    @commands.command()
+    @has_permissions(administrator=True)
+    async def FreezeTeams(self, ctx):
+        '''
+        Freezes the teams so that no one can join or leave
+        '''
+        self.isFrozen = True
+        await ctx.send("Teams have been frozen!")
+    
+    @commands.command()
+    @has_permissions(administrator=True)
+    async def UnfreezeTeams(self, ctx):
+        '''
+        Unfreezes the teams so that people can join or leave
+        '''
+        self.isFrozen = False
+        await ctx.send("Teams have been unfrozen!")
+        
+    @commands.command()
+    @has_permissions(administrator=True)
+    async def HandTeamLeaderTo(self, ctx, newLeader: discord.Member):
+        '''
+        Hand over team leader role to another member
+        '''
+        exists = False
+        teamToChange = None
+        
+        # Check if user is a team leader
+        for team in self.teams:
+            if team.team_leader == ctx.author:
+                exists = True
+                teamToChange = team
+                break
+        
+        # check if user is in team channel
+        if ctx.channel != teamToChange.team_channel:
+            return
+        
+        # check if team editing is frozen
+        if self.isFrozen:
+            await ctx.send(constants.FROZEN_TEAM_TEXT, delete_after=8)
+            return
+        
+        if not exists:
+            await ctx.send("You are not a team leader. Please choose another team.")
+            return
+        
+        # Check if new leader is in the team
+        if newLeader not in teamToChange.team_members:
+            await ctx.send("That user is not in your team. Please choose another user.")
+            return
+        
+        # Change the team leader
+        teamToChange.team_leader = newLeader
+        await ctx.author.remove_roles(self.team_leader_role)
+        await newLeader.add_roles(self.team_leader_role)
+        await ctx.send(f"{newLeader.mention} has successfully been made the team leader of {teamToChange.team_name}.")
 
 
 async def setup(bot):
