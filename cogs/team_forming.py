@@ -5,6 +5,7 @@ import cogs.utils.constants as constants
 import cogs.utils.channel_utils as channels
 from cogs.UI.team_dropdown import TeamDropdownView
 from cogs.UI.team_create_button import TeamCreateButtonView
+from cogs.UI.yes_no_buttons import YesNoButtonView
 
 
 class TeamForming(commands.Cog):
@@ -33,6 +34,7 @@ class TeamForming(commands.Cog):
         self.team_leader_role = None
         self.team_forming_channel = None
         self.join_message = None
+        self.switch_team_message = None
         self.teams = []
     
 
@@ -76,8 +78,9 @@ class TeamForming(commands.Cog):
             
             await ctx.send(f'{self.message_url} has been set up as the team forming channel.')
 
+
     #CREATE TEAM
-    async def on_create_team(self, interaction: discord.Interaction):
+    async def on_create_team(self, interaction: discord.Interaction, approved=False, team_name=""):
         '''
         Creates new team channel on react of specific message
         '''
@@ -87,15 +90,22 @@ class TeamForming(commands.Cog):
             return
         
         print("owo")
+        team_to_leave = None
         #Check if the person reacting is in a team
         for team in self.teams:
             if interaction.user in team.team_members:
-                if team.team_leader == interaction.user:
-                    await interaction.response.send_message("You are the team leader of another team. Are you sure you want to create a new team? Doing so will delete your curent team.", ephemeral=True)
+                if not approved:
+                    if team.team_leader == interaction.user:
+                        self.switch_team_message = await interaction.response.send_message("You are the team leader of another team. Are you sure you want to create a new team? Doing so will delete your curent team.", ephemeral=True, view=YesNoButtonView(on_yes=self.on_create_team, switch_interaction=interaction))
+                    else:
+                        self.switch_team_message = await interaction.response.send_message("You are already in a team. Are you sure you want to create a new team? Doing so will remove you from your current team.", ephemeral=True, view=YesNoButtonView(on_yes=self.on_create_team, switch_interaction=interaction))
+                    return
                 else:
-                    await interaction.response.send_message("You are already in a team. Are you sure you want to create a new team? Doing so will remove you from your current team.", ephemeral=True)
-                self.on_team_leave(interaction=interaction, team_name=team.team_name)
-                break
+                    if self.switch_team_message != None:
+                        await self.switch_team_message.delete()
+                        self.switch_team_message = None
+                    team_to_leave = team.team_name
+                    break
 
         print ("ewe")
         
@@ -131,18 +141,20 @@ class TeamForming(commands.Cog):
             team_count += 1
 
         new_role = await guild.create_role(name=title)
-
-        await member.add_roles(new_role, atomic=True)
-        await member.add_roles(self.team_leader_role, atomic=True)
         
         # permissions for team
         overwrites = {
             new_role: discord.PermissionOverwrite(read_messages=True),
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            member: discord.PermissionOverwrite(read_messages=False)
         }
 
         channel = await guild.create_text_channel(title, category=teamCategory, overwrites=overwrites)
+
+        await member.add_roles(new_role, atomic=True)
+        await member.add_roles(self.team_leader_role, atomic=True)
+        
+        if team_to_leave != None:
+            await self.on_team_leave(interaction=interaction, team_name=team_to_leave)
 
         await channel.send(f"{member.name} has joined {title}")
         
@@ -152,7 +164,7 @@ class TeamForming(commands.Cog):
         await self.update_team_dropdown()
         print("team added")
         
-    async def on_team_join(self, interaction, team_name):
+    async def on_team_join(self, interaction, team_name, approved=False):
         print("on_team_join has run")
         #await self.team_forming_channel.send(f'You joined team {team_name}!')
         
@@ -174,8 +186,18 @@ class TeamForming(commands.Cog):
                 # Check if the person is already in a team
                 for teamPrev in self.teams:
                     if interaction.user in teamPrev.team_members:
-                        await interaction.response.send_message("You are already in a team. Are you sure you want to join another team? Doing so will remove you from your current team.", ephemeral=True)
-                        await self.on_team_leave(interaction=interaction, team_name=teamPrev.team_name)
+                        if not approved:
+                            if teamPrev.team_leader == interaction.user:
+                                self.switch_team_message = await interaction.response.send_message("You are the team leader of another team. Are you sure you want to join another team? Doing so will delete your curent team.", ephemeral=True, view=YesNoButtonView(on_yes=self.on_team_join, switch_interaction=interaction, join_team_name=team_name))
+                            else:
+                                self.switch_team_message = await interaction.response.send_message("You are already in a team. Are you sure you want to join another team? Doing so will remove you from your current team.", ephemeral=True, view=YesNoButtonView(on_yes=self.on_team_join, switch_interaction=interaction, join_team_name=team_name))
+                            return
+                        else:
+                            if self.switch_team_message != None:
+                                await self.switch_team_message.delete()
+                                self.switch_team_message = None
+                            await self.on_team_leave(interaction=interaction, team_name=teamPrev.team_name)
+                            break
                 
                 team.add_member(interaction.user)
                 
@@ -201,6 +223,7 @@ class TeamForming(commands.Cog):
                 await team.team_channel.send(f'{interaction.user} left team {team_name}!')
                 # remove team role from user
                 await interaction.user.remove_roles(team.team_role, atomic=True)
+                print("team role removed")
                 
                 if self.team_leader_role in interaction.user.roles:
                     # Delete team
@@ -210,7 +233,7 @@ class TeamForming(commands.Cog):
                     await team.team_channel.delete()
                     await team.team_role.delete()
                     
-                    interaction.user.remove_roles(self.team_leader_role, atomic=True)
+                    await interaction.user.remove_roles(self.team_leader_role, atomic=True)
                     
                     self.teams.remove(team)
                     
