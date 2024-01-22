@@ -12,7 +12,7 @@ class Bot:
         self.intents.message_content = True
         self.intents.reactions = True
         self.client: Client = Client(intents=self.intents)
-        self.bot = commands.Bot(command_prefix='$', intents=self.intents)
+        self.bot = commands.Bot(command_prefix='$', intents=self.intents, help_command=None)
 
 
 bot = Bot()

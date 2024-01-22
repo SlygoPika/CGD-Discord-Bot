@@ -7,7 +7,7 @@ class AdminEditing(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(help=f"Admin Command: Renames an already existing team channel/role. Usage:\n *$RenameTeam <TeamName> <NewTeamName>*")
     @has_permissions(administrator=True)
     async def RenameTeam(self, ctx, teamRole, newTeamName):
         teamForming = self.bot.get_cog('TeamForming')
@@ -17,13 +17,14 @@ class AdminEditing(commands.Cog):
         for team in teamForming.teams:
             if team.team_role.name == teamRole:
                 await team.team_role.edit(name=newTeamName)
+                newTeamChannelName = f"{team.team_emoji}{constants.EMOJI_SEPARATOR}{newTeamChannelName}"
                 await team.team_channel.edit(name=newTeamChannelName)
                 await ctx.send(f'Your team name has successfully been set to "{newTeamName}"')
                 teamForming.update_team_dropdown()
                 return
         await ctx.send("That team name does not exist. Please choose another name.")
     
-    @commands.command()
+    @commands.command(help=f"Admin Command: Moves a user to a different team. Usage:\n *$MoveUserToTeam <@User> <Team>*")
     @has_permissions(administrator=True)
     async def MoveUserToTeam(self, ctx, user: discord.Member, teamRole):
         teamForming = self.bot.get_cog('TeamForming')
@@ -76,7 +77,7 @@ class AdminEditing(commands.Cog):
         await user.add_roles(newTeam.team_role)
         await ctx.send(f"{user.mention} has successfully been moved to {teamRole}.")
     
-    @commands.command()
+    @commands.command(help=f"Admin Command: Deletes a team. Usage:\n *$DeleteTeam <Team>*")
     @has_permissions(administrator=True)
     async def DeleteTeam(self, ctx, teamRole):
         teamForming = self.bot.get_cog('TeamForming')
@@ -105,7 +106,7 @@ class AdminEditing(commands.Cog):
         await ctx.send(f"{teamRole} has successfully been deleted.")
         teamForming.update_team_dropdown()
     
-    @commands.command()
+    @commands.command(help=f"Admin Command: Switches the team leader of a team. Usage:\n *$SwitchTeamLeader <@User> <Team>*")
     @has_permissions(administrator=True)
     async def SwitchTeamLeader(self, ctx, user: discord.Member, teamRole):
         teamForming = self.bot.get_cog('TeamForming')
@@ -128,11 +129,47 @@ class AdminEditing(commands.Cog):
             await ctx.send("That user is not in the team.")
             return
         
+        # Check if user is already the team leader
+        if user == teamToSwitch.team_leader:
+            await ctx.send("That user is already the team leader.")
+            return
+        
         # Switch the team leader
         teamToSwitch.team_leader.remove_roles(teamForming.team_leader_role)
         teamToSwitch.team_leader = user
         await user.add_roles(teamForming.team_leader_role)
+        await teamForming.update_team_dropdown()
         await ctx.send(f"{user.mention} has successfully been switched to the team leader of {teamRole}.")
+    
+    @commands.command(help=f"Admin Command: Removes all existing teams. Usage:\n *$ResetTeams*")
+    @has_permissions(administrator=True)
+    async def ResetTeams(self, ctx):
+        print("resetting teams")
+        
+        teamForming = self.bot.get_cog('TeamForming')
+        
+        for team in teamForming.teams:
+            #remove team leader role from team leader
+            await team.team_leader.remove_roles(teamForming.team_leader_role)
+            await team.team_role.delete()
+            await team.team_channel.delete()
+            
+        teamForming.teams = []
+        await teamForming.update_team_dropdown()
+        
+        await ctx.send("All teams have successfully been deleted.")
+    
+    @commands.command(help=f"Admin Command: Prints all existing teams. Usage:\n *$PrintTeams*")
+    @has_permissions(administrator=True)
+    async def PrintTeams(self, ctx):
+        teamForming = self.bot.get_cog('TeamForming')
+        for team in teamForming.teams:
+            print(team.team_name)
+            print(team.team_leader)
+            print(team.team_members)
+            print()
+        
+        await ctx.send("Check the console for the teams.")
     
                 
 

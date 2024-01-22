@@ -13,7 +13,7 @@ class TeamCategory(commands.Cog):
                 return category
         return None
 
-    @commands.command()
+    @commands.command(help=f"Admin command: Sets the category for team channels. Usage:\n *$SetTeamCategory <TeamCategory>*")
     @has_permissions(administrator=True)
     async def SetTeamCategory(self, ctx, TeamCategory):
         self.teamCategory = self.findCategory(ctx, TeamCategory)

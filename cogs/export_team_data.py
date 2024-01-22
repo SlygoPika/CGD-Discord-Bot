@@ -8,7 +8,7 @@ class ExportTeamData(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(help=f"Admin Command: Exports the team data to an Excel file. Usage:\n *$ExportTeamData*")
     @has_permissions(administrator=True)
     async def ExportTeamData(self, ctx):
         await ctx.send("Exporting team data...")

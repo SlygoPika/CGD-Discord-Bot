@@ -15,7 +15,7 @@ class TeamName(commands.Cog):
     def teamNameExists(self, teamName):
         teams = self.bot.get_cog('TeamForming').teams
         for team in teams:
-            if team.channel.name == self.roleNameToChannelName(teamName):
+            if team.team_channel.name == self.roleNameToChannelName(teamName):
                 return True
         return False
 
@@ -30,10 +30,12 @@ class TeamName(commands.Cog):
         except:
             return False
 
-    @commands.command()
+    @commands.command(aliases=['TeamName', 'setTeamName', 'setteamname', 'set_team_name'], help="Sets your team's name. Only available in your channel. 5 minute cooldown. Usage:\n *$SetTeamName \"newTeamName\"*")
     @commands.cooldown(1, 300, commands.BucketType.channel)
-    async def SetTeamName(self, ctx, newTeamName):
+    async def SetTeamName(self, ctx, newTeamName, *args):
         print("SetTeamName has run with " + newTeamName)
+        for arg in args:
+            newTeamName += " " + arg
         newTeamName = str(newTeamName.strip())
         teamRole = None
         
@@ -43,7 +45,7 @@ class TeamName(commands.Cog):
         teamToChange = None
         
         # Check if user is in a team
-        for team in self.teams:
+        for team in teamForming.teams:
             if team.team_leader == ctx.author:
                 exists = True
                 teamToChange = team
@@ -77,6 +79,7 @@ class TeamName(commands.Cog):
 
         await teamRole.edit(name=newTeamName)
         channelName = self.roleNameToChannelName(newTeamName)
+        channelName = f"{teamToChange.team_emoji}{constants.EMOJI_SEPARATOR}{channelName}"
         await ctx.channel.edit(name=channelName)
 
         await ctx.send(f'Your team name has successfully been set to "{newTeamName}"')

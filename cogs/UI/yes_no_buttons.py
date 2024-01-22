@@ -23,7 +23,7 @@ class YesNoButton(discord.ui.Button):
 
 class YesNoButtonView(discord.ui.View):
     def __init__(self, on_yes, switch_interaction, join_team_name=""):
-        super().__init__()
+        super().__init__(timeout=None)
         self.on_yes = on_yes
         self.add_item(YesNoButton(on_click=on_yes, is_yes=True, switch_interaction=switch_interaction, join_team_name=join_team_name))
         self.add_item(YesNoButton(on_click=None, is_yes=False, switch_interaction=switch_interaction, join_team_name=""))
