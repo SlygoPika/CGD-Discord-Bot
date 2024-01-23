@@ -170,8 +170,8 @@ class TeamForming(commands.Cog):
         vc_name = f"{constants.DEFAULT_TEAM_EMOJI}{constants.EMOJI_SEPARATOR}{title} {constants.TEAM_VC_SUFFIX}"
         
         vc_overwrites = {
-            new_role: discord.PermissionOverwrite(connect=True),
-            guild.default_role: discord.PermissionOverwrite(connect=False),
+            new_role: discord.PermissionOverwrite(connect=True, view_channel=True),
+            guild.default_role: discord.PermissionOverwrite(connect=False, view_channel=False),
         }
         
         vc = await guild.create_voice_channel(vc_name, category=self.teamCategory, overwrites=vc_overwrites)
