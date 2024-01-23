@@ -10,12 +10,12 @@ class TeamCreateButton(discord.ui.Button):
         self.cooldown = commands.CooldownMapping.from_cooldown(1, 180, commands.BucketType.member)
 
     async def callback(self, interaction: discord.Interaction):
-        # interaction.message.author = interaction.user
-        # bucket = self.cooldown.get_bucket(interaction.message)
-        # retry_after = bucket.update_rate_limit()
-        # if retry_after:
-        #     await interaction.response.send_message(f"You can't create a team for another {round(retry_after, 1)} seconds.", ephemeral=True, delete_after=8)
-        #     return
+        interaction.message.author = interaction.user
+        bucket = self.cooldown.get_bucket(interaction.message)
+        retry_after = bucket.update_rate_limit()
+        if retry_after:
+            await interaction.response.send_message(f"You can't create a team for another {round(retry_after, 1)} seconds.", ephemeral=True, delete_after=8)
+            return
         await self.on_team_create(interaction=interaction)
 class TeamCreateButtonView(discord.ui.View):
     def __init__(self, on_team_create, emoji=constants.DEFAULT_TEAM_CREATE_EMOJI):
