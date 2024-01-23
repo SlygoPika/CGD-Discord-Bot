@@ -26,9 +26,10 @@ class TeamAdd(commands.Cog):
             # Make a new team object
             team_role = discord.utils.get(ctx.guild.roles, name=teamName)
             team_channel = discord.utils.get(ctx.guild.channels, name=f"{constants.DEFAULT_TEAM_EMOJI}{constants.EMOJI_SEPARATOR}{self.roleNameToChannelName(teamName)}")
+            team_voice_channel = discord.utils.get(ctx.guild.channels, name=f"{constants.DEFAULT_TEAM_EMOJI}{constants.EMOJI_SEPARATOR}{teamName} {constants.TEAM_VC_SUFFIX}")
             team_leader = None
             team_members = []
-            team = teamForming.Team(teamName, team_leader, team_members, team_channel, team_role)
+            team = teamForming.Team(teamName, team_leader, team_members, team_channel, team_voice_channel, team_role)
             
             teamForming.teams.append(team)
             await teamForming.update_team_dropdown()

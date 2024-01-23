@@ -36,6 +36,8 @@ class TeamEmoji(commands.Cog):
                         #Set new channel name
                         new_channel_name = f"{team.team_emoji}{constants.EMOJI_SEPARATOR}{team.team_name.replace(' ', '-').lower()}"
                         await team.team_channel.edit(name=new_channel_name)
+                        new_vc_name = f"{team.team_emoji}{constants.EMOJI_SEPARATOR}{team.team_name} {constants.TEAM_VC_SUFFIX}"
+                        await team.team_voice_channel.edit(name=new_vc_name)
                         await teamForming.update_team_dropdown()
                         await ctx.send(f'The team emoji for {team.team_name} has successfully been set to "{TeamEmoji}"')
                         return

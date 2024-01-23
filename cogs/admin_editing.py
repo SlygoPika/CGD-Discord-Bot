@@ -19,6 +19,8 @@ class AdminEditing(commands.Cog):
                 await team.team_role.edit(name=newTeamName)
                 newTeamChannelName = f"{team.team_emoji}{constants.EMOJI_SEPARATOR}{newTeamChannelName}"
                 await team.team_channel.edit(name=newTeamChannelName)
+                new_vc_name = f"{team.team_emoji}{constants.EMOJI_SEPARATOR}{newTeamName} {constants.TEAM_VC_SUFFIX}"
+                await team.team_voice_channel.edit(name=new_vc_name)
                 await ctx.send(f'Your team name has successfully been set to "{newTeamName}"')
                 teamForming.update_team_dropdown()
                 return
@@ -98,6 +100,7 @@ class AdminEditing(commands.Cog):
         # Delete the team
         await teamToDelete.team_role.delete()
         await teamToDelete.team_channel.delete()
+        await teamToDelete.team_voice_channel.delete()
         await teamToDelete.team_leader.remove_roles(teamForming.team_leader_role)
         for team in teamForming.teams:
             if team.team_name == teamToDelete.team_name:
@@ -153,6 +156,7 @@ class AdminEditing(commands.Cog):
             await team.team_leader.remove_roles(teamForming.team_leader_role)
             await team.team_role.delete()
             await team.team_channel.delete()
+            await team.team_voice_channel.delete()
             
         teamForming.teams = []
         await teamForming.update_team_dropdown()

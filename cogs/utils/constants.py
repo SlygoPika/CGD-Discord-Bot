@@ -10,3 +10,4 @@ FROZEN_TEAM_TEXT = "The team formation process has ended. Please contact a staff
 RECOMMENDED_TEAM_SIZE = 4
 DEFAULT_TEAM_EMOJI = "👥"
 EMOJI_SEPARATOR = "┊"
+TEAM_VC_SUFFIX = "VC"

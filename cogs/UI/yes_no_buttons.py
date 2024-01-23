@@ -13,9 +13,8 @@ class YesNoButton(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         if self.is_yes:
             print("yes")
-            await self.on_click(interaction=self.switch_interaction, team_name=self.join_team_name, approved=True)
+            await self.on_click(interaction=interaction, team_name=self.join_team_name, approved=True)
             #delete the interaction response
-            await interaction.response.send_message(f"You switched team!", ephemeral=True, delete_after=8)
             await self.switch_interaction.delete_original_response()
         else:
             await interaction.response.send_message(f"You stayed on the same team.", ephemeral=True, delete_after=8)

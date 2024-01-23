@@ -81,6 +81,8 @@ class TeamName(commands.Cog):
         channelName = self.roleNameToChannelName(newTeamName)
         channelName = f"{teamToChange.team_emoji}{constants.EMOJI_SEPARATOR}{channelName}"
         await ctx.channel.edit(name=channelName)
+        vcName = f"{teamToChange.team_emoji}{constants.EMOJI_SEPARATOR}{newTeamName} {constants.TEAM_VC_SUFFIX}"
+        await teamToChange.team_voice_channel.edit(name=vcName)
 
         await ctx.send(f'Your team name has successfully been set to "{newTeamName}"')
     
