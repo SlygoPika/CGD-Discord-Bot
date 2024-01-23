@@ -45,6 +45,14 @@ class TeamEmoji(commands.Cog):
                         await ctx.send("Please input one emoji. The emoji must be a default discord emoji.")
                         self.SetTeamName.reset_cooldown(ctx)
                         return
+    
+    @SetTeamEmoji.error
+    async def SetTeamEmoji_error(self, ctx, error):
+        print ("on_command_error has run")
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"SetTeamEmoji is on cooldown. Try again in {error.retry_after:.2f}s.", delete_after=8)
+        else:
+            print(error)
 
 async def setup(bot):
     await bot.add_cog(TeamEmoji(bot))

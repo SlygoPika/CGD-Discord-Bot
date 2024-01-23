@@ -204,7 +204,7 @@ class TeamForming(commands.Cog):
                     await self.on_team_leave(interaction=interaction, team_name=team.team_name)
                     await self.update_team_dropdown()
                     return
-            interaction.response.send_message("You already are not in a team.", ephemeral=True)
+            await interaction.response.send_message("You already are not in a team.", ephemeral=True)
             return
         
         for team in self.teams:
