@@ -32,18 +32,18 @@ class TeamEmoji(commands.Cog):
                     TeamEmoji = emoji.distinct_emoji_list(TeamEmoji)[0]
                     print(TeamEmoji)
                     if emoji.emoji_count(TeamEmoji) == 1:
-                        team.team_emoji = TeamEmoji
                         #Set new channel name
-                        new_channel_name = f"{team.team_emoji}{constants.EMOJI_SEPARATOR}{team.team_name.replace(' ', '-').lower()}"
+                        new_channel_name = f"{TeamEmoji}{constants.EMOJI_SEPARATOR}{team.team_name.replace(' ', '-').lower()}"
                         await team.team_channel.edit(name=new_channel_name)
-                        new_vc_name = f"{team.team_emoji}{constants.EMOJI_SEPARATOR}{team.team_name} {constants.TEAM_VC_SUFFIX}"
+                        new_vc_name = f"{TeamEmoji}{constants.EMOJI_SEPARATOR}{team.team_name} {constants.TEAM_VC_SUFFIX}"
                         await team.team_voice_channel.edit(name=new_vc_name)
+                        team.team_emoji = TeamEmoji
                         await teamForming.update_team_dropdown()
                         await ctx.send(f'The team emoji for {team.team_name} has successfully been set to "{TeamEmoji}"')
                         return
                     else:
-                        await ctx.send("Please input one emoji. The emoji must be a default discord emoji.")
-                        self.SetTeamName.reset_cooldown(ctx)
+                        await ctx.send("Error: Please input one emoji. The emoji must be a default discord emoji.")
+                        self.SetTeamEmoji.reset_cooldown(ctx)
                         return
     
     @SetTeamEmoji.error
@@ -52,7 +52,8 @@ class TeamEmoji(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f"SetTeamEmoji is on cooldown. Try again in {error.retry_after:.2f}s.", delete_after=8)
         else:
-            print(error)
+            await ctx.send("Error: The emoji must be a default discord emoji.")
+            self.SetTeamEmoji.reset_cooldown(ctx)
 
 async def setup(bot):
     await bot.add_cog(TeamEmoji(bot))
