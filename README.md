@@ -2,12 +2,12 @@
 Discord.py bot for all CGD-related needs. Hosted on Google Cloud.
 ### Current functionalities:
 *Team Logistics (Used for GGJ 2024)*:
-- Allows users to make, create and customize teams:
+- Allows users to make, create and customize teams using the UI below. When the "Create Team" button is clicked, a new role, text channel, and voice channel that belongs to the team is created.
 ![alt text](https://github.com/SlygoPika/CGD-Discord-Bot/blob/main/img/teamFormingUI.png)
 - Exports team data into a spreadsheet containing team names, members, and the team leader
 
 ### Available commands:
-User commands:
+*User commands:*
 - **SetTeamName**
 Sets your team's name. Only available in your channel. 5 minute cooldown. Usage:
 $SetTeamName "newTeamName"
@@ -17,8 +17,11 @@ $HandTeamLeaderTo @newLeader
 - **SetTeamEmoji**
 Sets your team's emoji. Only available in your channel. 5 minute cooldown. Usage:
 $SetTeamEmoji "newTeamEmoji"
+- **Help**
+Displays a message explaining the available user commands. Usage:
+$Help
 
-Admin commands:
+*Admin commands:*
 - **RenameTeam**
 Admin Command: Renames an already existing team channel/role. Usage:
 $RenameTeam <TeamName> <NewTeamName>
@@ -63,5 +66,6 @@ Admin Command: Displays the admin commands.
 - **SetTeamFormingEmoji**
 Admin command: Sets the default emoji reaction for creating a team. Default is ✅. Usage:
 $SetTeamFormingEmoji <TeamEmoji>
-- **Help**
-Displays a message explaining the available commands.
+- **HelpAdmin**
+Admin command: Displays a message explaining the available user commands. Usage:
+$HelpAdmin
